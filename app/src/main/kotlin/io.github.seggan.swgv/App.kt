@@ -7,5 +7,6 @@ fun main() {
     Lwjgl3Application(Main(), Lwjgl3ApplicationConfiguration().apply {
         setTitle("SpigotWorldGenVis")
         setWindowedMode(640, 480)
+        setResizable(true)
     })
 }
