@@ -70,7 +70,6 @@ class CameraController(private val cam: Camera) : InputAdapter() {
             Gdx.app.exit()
         }
         cam.position.add(tmp)
-        cam.update(true)
     }
 
     companion object {

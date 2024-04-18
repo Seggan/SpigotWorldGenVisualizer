@@ -2,20 +2,15 @@ package io.github.seggan.swgv
 
 import com.badlogic.gdx.ApplicationListener
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.InputProcessor
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.PerspectiveCamera
 import com.badlogic.gdx.graphics.VertexAttributes.Usage
-import com.badlogic.gdx.graphics.g3d.Environment
-import com.badlogic.gdx.graphics.g3d.Material
-import com.badlogic.gdx.graphics.g3d.Model
-import com.badlogic.gdx.graphics.g3d.ModelBatch
-import com.badlogic.gdx.graphics.g3d.ModelInstance
+import com.badlogic.gdx.graphics.g3d.*
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight
-import com.badlogic.gdx.graphics.g3d.utils.CameraInputController
-import com.badlogic.gdx.graphics.g3d.utils.FirstPersonCameraController
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder
+import io.github.seggan.swgv.minecraft.block.Block
+import io.github.seggan.swgv.minecraft.McMaterial
 import io.github.seggan.swgv.util.use
 import ktx.app.clearScreen
 
@@ -25,7 +20,7 @@ class Main : ApplicationListener {
     private lateinit var camera: PerspectiveCamera
     private lateinit var camController: CameraController
 
-    private lateinit var model: Model
+    private lateinit var block: Block
     private lateinit var instance: ModelInstance
     private lateinit var modelBatch: ModelBatch
 
@@ -40,12 +35,8 @@ class Main : ApplicationListener {
         camera.update()
 
         modelBatch = ModelBatch()
-        model = ModelBuilder().createBox(
-            5f, 5f, 5f,
-            Material(ColorAttribute.createDiffuse(Color.GREEN)),
-            (Usage.Position or Usage.Normal).toLong()
-        )
-        instance = ModelInstance(model)
+        block = Block(McMaterial.ACACIA_PLANKS)
+        instance = block.getInstance()
 
         environment = Environment()
         environment.set(ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1f))
@@ -62,6 +53,7 @@ class Main : ApplicationListener {
     override fun render() {
         clearScreen(0f, 0f, 0f, 1f)
         camController.update()
+        camera.update(true)
 
         modelBatch.use(camera) {
             render(instance, environment)
@@ -76,6 +68,6 @@ class Main : ApplicationListener {
 
     override fun dispose() {
         modelBatch.dispose()
-        model.dispose()
+        block.dispose()
     }
 }
