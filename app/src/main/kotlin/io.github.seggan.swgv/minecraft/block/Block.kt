@@ -10,54 +10,25 @@ import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder
 import com.badlogic.gdx.utils.Disposable
 import io.github.seggan.swgv.minecraft.McMaterial
+import io.github.seggan.swgv.minecraft.block.model.BlockModel
+import io.github.seggan.swgv.minecraft.block.model.ModelTexture
+import io.github.seggan.swgv.util.identityHashSet
 import ktx.assets.toInternalFile
+import java.util.Collections
+import java.util.IdentityHashMap
 
 class Block(private val mcMaterial: McMaterial) : Disposable {
 
     private val model: Model
-    private val texture = BlockTexture.singleTexture(Texture("minecraft/textures/block/${mcMaterial.name.lowercase()}.png".toInternalFile()))
+    private val textures = identityHashSet<Texture>()
 
     init {
         val builder = ModelBuilder()
-        val attr = (VertexAttributes.Usage.Position or VertexAttributes.Usage.Normal or VertexAttributes.Usage.TextureCoordinates).toLong()
-
         builder.begin()
-        builder.part(
-            "front",
-            GL20.GL_TRIANGLES,
-            attr,
-            Material(TextureAttribute.createDiffuse(texture.front)),
-        ).rect(-2f, -2f, -2f, -2f, 2f, -2f, 2f, 2f, -2f, 2f, -2f, -2f, 0f, 0f, -1f)
-        builder.part(
-            "back",
-            GL20.GL_TRIANGLES,
-            attr,
-            Material(TextureAttribute.createDiffuse(texture.back)),
-        ).rect(-2f, 2f, 2f, -2f, -2f, 2f, 2f, -2f, 2f, 2f, 2f, 2f, 0f, 0f, 1f)
-        builder.part(
-            "bottom",
-            GL20.GL_TRIANGLES,
-            attr,
-            Material(TextureAttribute.createDiffuse(texture.bottom)),
-        ).rect(-2f, -2f, 2f, -2f, -2f, -2f, 2f, -2f, -2f, 2f, -2f, 2f, 0f, -1f, 0f)
-        builder.part(
-            "top",
-            GL20.GL_TRIANGLES,
-            attr,
-            Material(TextureAttribute.createDiffuse(texture.top)),
-        ).rect(-2f, 2f, -2f, -2f, 2f, 2f, 2f, 2f, 2f, 2f, 2f, -2f, 0f, 1f, 0f)
-        builder.part(
-            "left",
-            GL20.GL_TRIANGLES,
-            attr,
-            Material(TextureAttribute.createDiffuse(texture.left)),
-        ).rect(-2f, -2f, 2f, -2f, 2f, 2f, -2f, 2f, -2f, -2f, -2f, -2f, -1f, 0f, 0f)
-        builder.part(
-            "right",
-            GL20.GL_TRIANGLES,
-            attr,
-            Material(TextureAttribute.createDiffuse(texture.right)),
-        ).rect(2f, -2f, -2f, 2f, 2f, -2f, 2f, 2f, 2f, 2f, -2f, 2f, 1f, 0f, 0f)
+        val blockModel = BlockModel.getModel(mcMaterial.name.lowercase())
+        for (element in blockModel.elements) {
+            textures.addAll(element.render(builder, blockModel))
+        }
         model = builder.end()
     }
 
@@ -65,6 +36,8 @@ class Block(private val mcMaterial: McMaterial) : Disposable {
 
     override fun dispose() {
         model.dispose()
-        texture.dispose()
+        for (texture in textures) {
+            texture.dispose()
+        }
     }
 }

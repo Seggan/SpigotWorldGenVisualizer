@@ -2,17 +2,16 @@ package io.github.seggan.swgv
 
 import com.badlogic.gdx.ApplicationListener
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.PerspectiveCamera
-import com.badlogic.gdx.graphics.VertexAttributes.Usage
 import com.badlogic.gdx.graphics.g3d.*
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight
-import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder
 import io.github.seggan.swgv.minecraft.block.Block
 import io.github.seggan.swgv.minecraft.McMaterial
+import io.github.seggan.swgv.minecraft.block.model.BlockModel
 import io.github.seggan.swgv.util.use
 import ktx.app.clearScreen
+import org.lwjgl.opengl.GL40
 
 
 class Main : ApplicationListener {
@@ -35,7 +34,7 @@ class Main : ApplicationListener {
         camera.update()
 
         modelBatch = ModelBatch()
-        block = Block(McMaterial.ACACIA_PLANKS)
+        block = Block(McMaterial.BEACON)
         instance = block.getInstance()
 
         environment = Environment()
@@ -45,6 +44,8 @@ class Main : ApplicationListener {
         camController = CameraController(camera)
         Gdx.input.inputProcessor = camController
         Gdx.input.isCursorCatched = true
+
+        println(BlockModel.getModel("acacia_planks"))
     }
 
     override fun resize(width: Int, height: Int) {
