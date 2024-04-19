@@ -31,7 +31,7 @@ class Main : ApplicationListener {
 
     override fun create() {
         camera = PerspectiveCamera(67f, Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat())
-        camera.position.set(10f, 10f, 10f)
+        camera.position.set(5f, 5f, 5f)
         camera.lookAt(0f, 0f, -10f)
         camera.near = 1f
         camera.far = 300f
@@ -40,7 +40,7 @@ class Main : ApplicationListener {
         viewport = ScreenViewport(camera)
 
         modelBatch = ModelBatch()
-        block = Block(McMaterial.DRAGON_EGG)
+        block = Block(McMaterial.BEACON)
         instance = block.getInstance()
 
         environment = Environment()

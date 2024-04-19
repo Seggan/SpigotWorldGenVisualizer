@@ -2,21 +2,19 @@ package io.github.seggan.swgv.minecraft.block.model
 
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.Texture
-import com.badlogic.gdx.graphics.VertexAttributes
 import com.badlogic.gdx.graphics.VertexAttributes.Usage
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.graphics.g3d.Material
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute
+import com.badlogic.gdx.graphics.g3d.attributes.DepthTestAttribute
+import com.badlogic.gdx.graphics.g3d.attributes.IntAttribute
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder
 import com.badlogic.gdx.math.Vector3
-import io.github.seggan.swgv.util.identityHashSet
 import kotlinx.serialization.*
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
-import java.util.Collections
-import java.util.IdentityHashMap
 
 @Serializable
 @Suppress("DataClassPrivateConstructor")
@@ -42,11 +40,21 @@ data class ModelElement private constructor(
             val texture = textures.computeIfAbsent(data.texture.substringAfter("#")) {
                 model.getTexture(it).blockTexture()
             }
+            val region = TextureRegion(texture)
+            region.u = data.uv[0] / 16f
+            region.v = data.uv[1] / 16f
+            region.u2 = data.uv[2] / 16f
+            region.v2 = data.uv[3] / 16f
             val mpb = builder.part(
                 face.name,
                 GL20.GL_TRIANGLES,
                 attr,
-                Material(TextureAttribute.createDiffuse(texture), blending),
+                Material(
+                    TextureAttribute.createDiffuse(region),
+                    blending,
+                    IntAttribute.createCullFace(GL20.GL_NONE),
+                    DepthTestAttribute(true)
+                ),
             )
             mpb.rect(
                 vertices[0] / 16, vertices[1] / 16, vertices[2] / 16,
@@ -55,7 +63,7 @@ data class ModelElement private constructor(
                 vertices[9] / 16, vertices[10] / 16, vertices[11] / 16,
                 face.normal.x, face.normal.y, face.normal.z
             )
-            mpb.setUVRange(data.uv[0], data.uv[1], data.uv[2], data.uv[3])
+            mpb.setUVRange(region)
         }
         return textures.values
     }
@@ -73,7 +81,7 @@ data class ModelElement private constructor(
     @Suppress("ArrayInDataClass")
     data class FaceInfo private constructor(
         val texture: String,
-        val uv: FloatArray = floatArrayOf(0f, 0f, 16f, 16f),
+        val uv: IntArray = intArrayOf(0, 0, 16, 16),
         @SerialName("cullface")
         val cullFace: String = texture,
         val rotation: Int = 0,
