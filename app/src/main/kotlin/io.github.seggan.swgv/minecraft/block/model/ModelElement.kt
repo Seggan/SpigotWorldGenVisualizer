@@ -3,6 +3,8 @@ package io.github.seggan.swgv.minecraft.block.model
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.VertexAttributes
+import com.badlogic.gdx.graphics.VertexAttributes.Usage
+import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.graphics.g3d.Material
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute
@@ -30,26 +32,30 @@ data class ModelElement private constructor(
 
     fun render(builder: ModelBuilder, model: BlockModel): Collection<Texture> {
         val textures = mutableMapOf<String, Texture>()
-        val attr =
-            (VertexAttributes.Usage.Position or VertexAttributes.Usage.Normal or VertexAttributes.Usage.TextureCoordinates).toLong()
+        val attr = (Usage.Position or
+                Usage.Normal or
+                Usage.TextureCoordinates
+                ).toLong()
         val blending = BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
         for ((face, data) in faces.toSortedMap()) {
-            val (vertices, normal) = face.vertexSelector(from, to)
+            val vertices = face.vertexSelector(from, to)
             val texture = textures.computeIfAbsent(data.texture.substringAfter("#")) {
                 model.getTexture(it).blockTexture()
             }
-            builder.part(
+            val mpb = builder.part(
                 face.name,
                 GL20.GL_TRIANGLES,
                 attr,
                 Material(TextureAttribute.createDiffuse(texture), blending),
-            ).rect(
+            )
+            mpb.rect(
                 vertices[0] / 16, vertices[1] / 16, vertices[2] / 16,
                 vertices[3] / 16, vertices[4] / 16, vertices[5] / 16,
                 vertices[6] / 16, vertices[7] / 16, vertices[8] / 16,
                 vertices[9] / 16, vertices[10] / 16, vertices[11] / 16,
-                normal.x, normal.y, normal.z
+                face.normal.x, face.normal.y, face.normal.z
             )
+            mpb.setUVRange(data.uv[0], data.uv[1], data.uv[2], data.uv[3])
         }
         return textures.values
     }
@@ -67,9 +73,9 @@ data class ModelElement private constructor(
     @Suppress("ArrayInDataClass")
     data class FaceInfo private constructor(
         val texture: String,
-        val uv: IntArray = intArrayOf(0, 0, 16, 16),
+        val uv: FloatArray = floatArrayOf(0f, 0f, 16f, 16f),
         @SerialName("cullface")
-        val cullFace: String? = null,
+        val cullFace: String = texture,
         val rotation: Int = 0,
         @SerialName("tintindex")
         val tintIndex: Int = -1
@@ -80,55 +86,58 @@ data class ModelElement private constructor(
     }
 
     @Serializable
-    enum class Face(val vertexSelector: (from: Vector3, to: Vector3) -> Pair<FloatArray, Vector3>) {
+    enum class Face(
+        val vertexSelector: (from: Vector3, to: Vector3) -> FloatArray,
+        val normal: Vector3
+    ) {
         UP({ from, to ->
             floatArrayOf(
                 from.x, to.y, from.z,
                 from.x, to.y, to.z,
                 to.x, to.y, to.z,
                 to.x, to.y, from.z
-            ) to Vector3(0f, 1f, 0f)
-        }),
+            )
+        }, Vector3(0f, 1f, 0f)),
         DOWN({ from, to ->
             floatArrayOf(
-                from.x, from.y, from.z,
-                from.x, from.y, to.z,
+                to.x, from.y, from.z,
                 to.x, from.y, to.z,
-                to.x, from.y, from.z
-            ) to Vector3(0f, -1f, 0f)
-        }),
+                from.x, from.y, to.z,
+                from.x, from.y, from.z
+            )
+        }, Vector3(0f, -1f, 0f)),
         NORTH({ from, to ->
             floatArrayOf(
+                to.x, from.y, from.z,
                 from.x, from.y, from.z,
                 from.x, to.y, from.z,
-                to.x, to.y, from.z,
-                to.x, from.y, from.z
-            ) to Vector3(0f, 0f, -1f)
-        }),
+                to.x, to.y, from.z
+            )
+        }, Vector3(0f, 0f, -1f)),
         SOUTH({ from, to ->
             floatArrayOf(
                 from.x, from.y, to.z,
                 to.x, from.y, to.z,
                 to.x, to.y, to.z,
                 from.x, to.y, to.z
-            ) to Vector3(0f, 0f, 1f)
-        }),
+            )
+        }, Vector3(0f, 0f, 1f)),
         EAST({ from, to ->
             floatArrayOf(
+                to.x, from.y, to.z,
                 to.x, from.y, from.z,
                 to.x, to.y, from.z,
-                to.x, to.y, to.z,
-                to.x, from.y, to.z
-            ) to Vector3(1f, 0f, 0f)
-        }),
+                to.x, to.y, to.z
+            )
+        }, Vector3(1f, 0f, 0f)),
         WEST({ from, to ->
             floatArrayOf(
                 from.x, from.y, from.z,
                 from.x, from.y, to.z,
                 from.x, to.y, to.z,
                 from.x, to.y, from.z
-            ) to Vector3(-1f, 0f, 0f)
-        });
+            )
+        }, Vector3(-1f, 0f, 0f));
     }
 }
 

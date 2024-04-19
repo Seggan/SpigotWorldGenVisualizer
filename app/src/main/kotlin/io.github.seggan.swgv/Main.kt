@@ -6,6 +6,9 @@ import com.badlogic.gdx.graphics.PerspectiveCamera
 import com.badlogic.gdx.graphics.g3d.*
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight
+import com.badlogic.gdx.utils.viewport.FitViewport
+import com.badlogic.gdx.utils.viewport.ScreenViewport
+import com.badlogic.gdx.utils.viewport.Viewport
 import io.github.seggan.swgv.minecraft.block.Block
 import io.github.seggan.swgv.minecraft.McMaterial
 import io.github.seggan.swgv.minecraft.block.model.BlockModel
@@ -18,6 +21,7 @@ class Main : ApplicationListener {
 
     private lateinit var camera: PerspectiveCamera
     private lateinit var camController: CameraController
+    private lateinit var viewport: Viewport
 
     private lateinit var block: Block
     private lateinit var instance: ModelInstance
@@ -28,13 +32,15 @@ class Main : ApplicationListener {
     override fun create() {
         camera = PerspectiveCamera(67f, Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat())
         camera.position.set(10f, 10f, 10f)
-        camera.lookAt(0f, 0f, 0f)
+        camera.lookAt(0f, 0f, -10f)
         camera.near = 1f
         camera.far = 300f
         camera.update()
 
+        viewport = ScreenViewport(camera)
+
         modelBatch = ModelBatch()
-        block = Block(McMaterial.BEACON)
+        block = Block(McMaterial.DRAGON_EGG)
         instance = block.getInstance()
 
         environment = Environment()
@@ -44,15 +50,15 @@ class Main : ApplicationListener {
         camController = CameraController(camera)
         Gdx.input.inputProcessor = camController
         Gdx.input.isCursorCatched = true
-
-        println(BlockModel.getModel("acacia_planks"))
     }
 
     override fun resize(width: Int, height: Int) {
+        viewport.update(width, height)
+        camera.update()
     }
 
     override fun render() {
-        clearScreen(0f, 0f, 0f, 1f)
+        clearScreen(.5f, .5f, 1f, 1f)
         camController.update()
         camera.update(true)
 

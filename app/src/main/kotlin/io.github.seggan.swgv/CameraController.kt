@@ -19,6 +19,11 @@ class CameraController(private val cam: Camera) : InputAdapter() {
     private val tmp = Vector3()
 
     override fun mouseMoved(screenX: Int, screenY: Int): Boolean {
+        if (!Gdx.input.isCursorCatched) return false
+        if (dragX == 0 && dragY == 0) {
+            dragX = screenX
+            dragY = screenY
+        }
         val x = dragX - screenX
         cam.rotate(Vector3.Y, x * ROT_SPEED)
 
@@ -26,6 +31,13 @@ class CameraController(private val cam: Camera) : InputAdapter() {
         cam.direction.y += y * ROT_SPEED * 5
 
         cam.update()
+        dragX = screenX
+        dragY = screenY
+        return true
+    }
+
+    override fun touchDown(screenX: Int, screenY: Int, pointer: Int, button: Int): Boolean {
+        Gdx.input.isCursorCatched = true
         dragX = screenX
         dragY = screenY
         return true
@@ -67,7 +79,7 @@ class CameraController(private val cam: Camera) : InputAdapter() {
             tmp.set(Vector3.Y).scl(-MOVE_SPEED * dt)
         }
         if (keys.containsKey(Keys.ESCAPE)) {
-            Gdx.app.exit()
+            Gdx.input.isCursorCatched = false
         }
         cam.position.add(tmp)
     }
