@@ -1,21 +1,13 @@
-package io.github.seggan.swgv.minecraft.block
+package io.github.seggan.swgv.client.minecraft.block
 
-import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.Texture
-import com.badlogic.gdx.graphics.VertexAttributes
-import com.badlogic.gdx.graphics.g3d.Material
 import com.badlogic.gdx.graphics.g3d.Model
 import com.badlogic.gdx.graphics.g3d.ModelInstance
-import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder
 import com.badlogic.gdx.utils.Disposable
-import io.github.seggan.swgv.minecraft.McMaterial
-import io.github.seggan.swgv.minecraft.block.model.BlockModel
-import io.github.seggan.swgv.minecraft.block.model.ModelTexture
-import io.github.seggan.swgv.util.identityHashSet
-import ktx.assets.toInternalFile
-import java.util.Collections
-import java.util.IdentityHashMap
+import io.github.seggan.swgv.client.minecraft.McMaterial
+import io.github.seggan.swgv.client.minecraft.block.model.BlockModel
+import io.github.seggan.swgv.client.util.identityHashSet
 
 class Block(private val mcMaterial: McMaterial) : Disposable {
 
@@ -32,7 +24,11 @@ class Block(private val mcMaterial: McMaterial) : Disposable {
         model = builder.end()
     }
 
-    fun getInstance() = ModelInstance(model)
+    fun createInstance(x: Int, y: Int, z: Int): ModelInstance {
+        val model = ModelInstance(model)
+        model.transform.setToTranslation(x.toFloat(), y.toFloat(), z.toFloat())
+        return model
+    }
 
     override fun dispose() {
         model.dispose()

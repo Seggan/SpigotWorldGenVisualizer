@@ -1,4 +1,4 @@
-package io.github.seggan.swgv
+package io.github.seggan.swgv.client
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input.Keys
@@ -6,7 +6,6 @@ import com.badlogic.gdx.InputAdapter
 import com.badlogic.gdx.graphics.Camera
 import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.utils.IntIntMap
-import kotlin.math.abs
 import kotlin.math.sin
 
 

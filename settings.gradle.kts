@@ -4,4 +4,4 @@ plugins {
 }
 
 rootProject.name = "SpigotWorldGenVis"
-include("app")
+include("app", "test-plugin")

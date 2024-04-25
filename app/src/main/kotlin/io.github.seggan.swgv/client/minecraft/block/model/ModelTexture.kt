@@ -1,4 +1,4 @@
-package io.github.seggan.swgv.minecraft.block.model
+package io.github.seggan.swgv.client.minecraft.block.model
 
 import com.badlogic.gdx.graphics.Texture
 import kotlinx.serialization.KSerializer

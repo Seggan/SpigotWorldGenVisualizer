@@ -1,4 +1,4 @@
-package io.github.seggan.swgv.minecraft.block.model
+package io.github.seggan.swgv.client.minecraft.block.model
 
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName

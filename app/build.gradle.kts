@@ -1,12 +1,6 @@
 plugins {
-    kotlin("jvm") version "1.9.23"
+    kotlin("jvm")
     kotlin("plugin.serialization") version "1.9.23"
-    application
-}
-
-repositories {
-    mavenCentral()
-    maven("https://repo.aikar.co/content/groups/aikar/")
 }
 
 val gdxVersion: String by project
@@ -42,14 +36,6 @@ java {
     }
 }
 
-application {
-    mainClass = "io.github.seggan.swgv.AppKt"
-}
-
 tasks.named<Test>("test") {
     useJUnitPlatform()
-}
-
-tasks.named<JavaExec>("run") {
-    workingDir = file("assets")
 }

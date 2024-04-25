@@ -1,4 +1,4 @@
-package io.github.seggan.swgv.minecraft.block.model
+package io.github.seggan.swgv.client.minecraft.block.model
 
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.Texture
@@ -34,7 +34,8 @@ data class ModelElement private constructor(
                 Usage.Normal or
                 Usage.TextureCoordinates
                 ).toLong()
-        val blending = BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
+        //val blending = BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
+        val blending = BlendingAttribute(false, 1f)
         for ((face, data) in faces.toSortedMap()) {
             val vertices = face.vertexSelector(from, to)
             val texture = textures.computeIfAbsent(data.texture.substringAfter("#")) {
@@ -51,9 +52,7 @@ data class ModelElement private constructor(
                 attr,
                 Material(
                     TextureAttribute.createDiffuse(region),
-                    blending,
-                    IntAttribute.createCullFace(GL20.GL_NONE),
-                    DepthTestAttribute(true)
+                    blending
                 ),
             )
             mpb.rect(
