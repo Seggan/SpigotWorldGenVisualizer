@@ -13,6 +13,7 @@ import com.badlogic.gdx.utils.viewport.Viewport
 import io.github.seggan.swgv.client.minecraft.ClientChunk
 import io.github.seggan.swgv.client.minecraft.block.BlockCache
 import io.github.seggan.swgv.client.minecraft.generateChunk
+import io.github.seggan.swgv.shaders.BlockShaderProvider
 import ktx.app.clearScreen
 import org.bukkit.World
 import org.bukkit.generator.ChunkGenerator
@@ -25,7 +26,7 @@ class Client(
     private lateinit var camera: PerspectiveCamera
     private lateinit var camController: CameraController
     private lateinit var viewport: Viewport
-    private lateinit var light: DirectionalLight
+    private lateinit var light: DirectionalShadowLight
 
     private lateinit var modelBatch: ModelBatch
     private lateinit var environment: Environment
@@ -42,15 +43,16 @@ class Client(
 
         viewport = ScreenViewport(camera)
 
-        modelBatch = ModelBatch()
+        modelBatch = ModelBatch(BlockShaderProvider())
         val chunk = generator.generateChunk(world, 0, 0)
         chunks += chunk
 
         environment = Environment()
         environment.set(ColorAttribute(ColorAttribute.AmbientLight, 0.4f, .4f, .4f, .4f))
-        light = DirectionalLight()
+        light = DirectionalShadowLight(1024, 1024, 100f, 100f, .1f, 300f)
         light.set(1f, 1f, 1f, -1f, -1f, -1f)
         environment.add(light)
+        environment.shadowMap = light
 
         camController = CameraController(camera)
         Gdx.input.inputProcessor = camController
