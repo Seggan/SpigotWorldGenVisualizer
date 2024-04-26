@@ -1,13 +1,10 @@
 package io.github.seggan.swgv.client.minecraft.block.model
 
-import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.VertexAttributes.Usage
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.graphics.g3d.Material
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute
-import com.badlogic.gdx.graphics.g3d.attributes.DepthTestAttribute
-import com.badlogic.gdx.graphics.g3d.attributes.IntAttribute
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder
 import com.badlogic.gdx.math.Vector3
@@ -16,7 +13,7 @@ import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import org.bukkit.block.BlockFace
-import java.util.EnumMap
+import java.util.*
 
 @Serializable
 @Suppress("DataClassPrivateConstructor")
@@ -30,15 +27,16 @@ data class ModelElement private constructor(
     val shade: Boolean = true
 ) {
 
-    fun render(builder: ModelBuilder, model: BlockModel): Collection<Texture> {
-        val textures = mutableMapOf<String, Texture>()
+    fun getFaceModels(model: BlockModel): Pair<List<ElementFace>, List<Texture>> {
         val attr = (Usage.Position or
                 Usage.Normal or
                 Usage.TextureCoordinates
                 ).toLong()
-        //val blending = BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
         val blending = BlendingAttribute(false, 1f)
-        for ((face, data) in faces.toSortedMap()) {
+        val textures = mutableMapOf<String, Texture>()
+        val models = mutableListOf<ElementFace>()
+        for ((face, data) in faces) {
+            val modelBuilder = ModelBuilder()
             val vertices = face.toRect(from, to)
             val texture = textures.computeIfAbsent(data.texture.substringAfter("#")) {
                 model.getTexture(it).blockTexture()
@@ -48,26 +46,22 @@ data class ModelElement private constructor(
             region.v = data.uv[1] / 16f
             region.u2 = data.uv[2] / 16f
             region.v2 = data.uv[3] / 16f
-            val mpb = builder.part(
-                face.name,
-                GL20.GL_TRIANGLES,
-                attr,
+            val normal = normals[face]!!
+            val result = modelBuilder.createRect(
+                vertices[0] / 16f, vertices[1] / 16f, vertices[2] / 16f,
+                vertices[3] / 16f, vertices[4] / 16f, vertices[5] / 16f,
+                vertices[6] / 16f, vertices[7] / 16f, vertices[8] / 16f,
+                vertices[9] / 16f, vertices[10] / 16f, vertices[11] / 16f,
+                normal.x, normal.y, normal.z,
                 Material(
                     TextureAttribute.createDiffuse(region),
                     blending
                 ),
+                attr
             )
-            val normal = normals[face]!!
-            mpb.rect(
-                vertices[0] / 16, vertices[1] / 16, vertices[2] / 16,
-                vertices[3] / 16, vertices[4] / 16, vertices[5] / 16,
-                vertices[6] / 16, vertices[7] / 16, vertices[8] / 16,
-                vertices[9] / 16, vertices[10] / 16, vertices[11] / 16,
-                normal.x, normal.y, normal.z
-            )
-            mpb.setUVRange(region)
+            models.add(ElementFace(face, result))
         }
-        return textures.values
+        return models to textures.values.toList()
     }
 
     @Serializable

@@ -1,18 +1,22 @@
 package io.github.seggan.swgv.client.minecraft.block.model
 
 import com.badlogic.gdx.graphics.Texture
+import io.github.seggan.swgv.ASSETS_DIR
+import io.github.seggan.swgv.TEMP_DIR
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
-import ktx.assets.toInternalFile
+import ktx.assets.toAbsoluteFile
 
 @Serializable(with = ModelTextureSerializer::class)
 sealed interface ModelTexture {
     data class Texture(val texture: String) : ModelTexture {
-        fun blockTexture() = Texture("minecraft/textures/block/$texture.png".toInternalFile())
+        fun blockTexture(): com.badlogic.gdx.graphics.Texture {
+            return Texture("$ASSETS_DIR/minecraft/textures/block/$texture.png".toAbsoluteFile())
+        }
     }
 
     data class Tag(val tag: String) : ModelTexture

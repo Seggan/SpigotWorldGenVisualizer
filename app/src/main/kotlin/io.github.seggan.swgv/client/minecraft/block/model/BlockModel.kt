@@ -1,10 +1,12 @@
 package io.github.seggan.swgv.client.minecraft.block.model
 
+import io.github.seggan.swgv.ASSETS_DIR
+import io.github.seggan.swgv.TEMP_DIR
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.*
-import ktx.assets.toInternalFile
+import ktx.assets.toAbsoluteFile
 
 @Serializable
 @Suppress("DataClassPrivateConstructor")
@@ -24,10 +26,9 @@ data class BlockModel private constructor(
     }
 
     companion object {
-        private const val MODELS_DIR = "minecraft/models/block"
 
         private fun appendData(location: String, data: MutableMap<String, JsonElement>) {
-            val file = "$MODELS_DIR/$location.json".toInternalFile()
+            val file = "$ASSETS_DIR/minecraft/models/block/$location.json".toAbsoluteFile()
             val json = Json.parseToJsonElement(file.readString()).jsonObject.toMutableMap()
             json["parent"]?.let {
                 appendData(it.jsonPrimitive.content.split('/')[1], json)

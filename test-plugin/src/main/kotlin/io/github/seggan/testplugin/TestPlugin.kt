@@ -7,6 +7,7 @@ open class TestPlugin : JavaPlugin()
 
 fun main() {
     visualizeWorldGeneration(
+        "1.20.2",
         TestPlugin::class.java,
         TestGenerator
     )

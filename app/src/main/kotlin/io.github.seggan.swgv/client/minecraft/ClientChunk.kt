@@ -1,7 +1,11 @@
 package io.github.seggan.swgv.client.minecraft
 
 import be.seeseemelk.mockbukkit.MockChunkData
+import com.badlogic.gdx.graphics.g3d.Model
+import com.badlogic.gdx.graphics.g3d.ModelCache
 import com.badlogic.gdx.graphics.g3d.ModelInstance
+import com.badlogic.gdx.graphics.g3d.RenderableProvider
+import com.badlogic.gdx.utils.Disposable
 import io.github.seggan.swgv.client.minecraft.block.BlockCache
 import org.bukkit.World
 import org.bukkit.block.BlockFace
@@ -15,34 +19,46 @@ class ClientChunk(
     val x: Int,
     val z: Int,
     val data: ChunkData
-) {
-    fun getBlocks(): List<ModelInstance> {
-        val blocks = mutableListOf<ModelInstance>()
+) : Disposable {
+    val model: ModelCache by lazy {
         val cx = x * 16
         val cz = z * 16
-        for (y in 0 until world.maxHeight) {
-            for (x in 0 until 16) {
+        val cache = ModelCache()
+        cache.begin()
+        for (x in 0 until 16) {
+            for (y in world.minHeight until world.maxHeight) {
                 for (z in 0 until 16) {
                     val block = data.getType(x, y, z)
-                    if (ORTHOGONAL.all {
-                        val relX = x + it.modX
-                        val relY = y + it.modY
-                        val relZ = z + it.modZ
-                        if (relX < 0 || relX >= 16) return@all true
-                        if (relY < 0 || relY >= world.maxHeight) return@all true
-                        if (relZ < 0 || relZ >= 16) return@all true
-                        !data.getType(relX, relY, relZ).isEmpty
-                    }) continue
-                    val creator = BlockCache[block] ?: continue
-                    blocks += creator.createInstance(cx + x, y, cz + z)
+                    val faces = BlockCache[block]
+                    for (face in faces) {
+                        if (
+                            data.hasSolidBlock(
+                                world,
+                                x + face.cullFace.modX,
+                                y + face.cullFace.modY,
+                                z + face.cullFace.modZ
+                            )
+                        ) continue
+                        val model = ModelInstance(face.model)
+                        model.transform.setToTranslation(cx + x.toFloat(), y.toFloat(), cz + z.toFloat())
+                        cache.add(model)
+                    }
                 }
             }
         }
-        return blocks
+        cache.end()
+        cache
+    }
+
+    override fun dispose() {
+        model.dispose()
     }
 }
 
-private val ORTHOGONAL = arrayOf(BlockFace.UP, BlockFace.DOWN, BlockFace.NORTH, BlockFace.SOUTH, BlockFace.WEST, BlockFace.EAST)
+fun ChunkData.hasSolidBlock(info: WorldInfo, x: Int, y: Int, z: Int): Boolean {
+    if (x < 0 || x >= 16 || z < 0 || z >= 16 || y < info.minHeight || y >= info.maxHeight) return true
+    return getType(x, y, z).isSolid
+}
 
 fun ChunkGenerator.generateChunk(world: World, x: Int, z: Int): ClientChunk {
     val data = MockChunkData(world)
