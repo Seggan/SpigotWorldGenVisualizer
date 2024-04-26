@@ -6,14 +6,12 @@ import com.badlogic.gdx.graphics.PerspectiveCamera
 import com.badlogic.gdx.graphics.g3d.Environment
 import com.badlogic.gdx.graphics.g3d.ModelBatch
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute
-import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalShadowLight
 import com.badlogic.gdx.utils.viewport.ScreenViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import io.github.seggan.swgv.client.minecraft.ClientChunk
 import io.github.seggan.swgv.client.minecraft.block.BlockCache
 import io.github.seggan.swgv.client.minecraft.generateChunk
-import io.github.seggan.swgv.shaders.BlockShaderProvider
 import ktx.app.clearScreen
 import org.bukkit.World
 import org.bukkit.generator.ChunkGenerator
@@ -43,7 +41,7 @@ class Client(
 
         viewport = ScreenViewport(camera)
 
-        modelBatch = ModelBatch(BlockShaderProvider())
+        modelBatch = ModelBatch()
         val chunk = generator.generateChunk(world, 0, 0)
         chunks += chunk
 
