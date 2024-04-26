@@ -15,6 +15,8 @@ import kotlinx.serialization.*
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
+import org.bukkit.block.BlockFace
+import java.util.EnumMap
 
 @Serializable
 @Suppress("DataClassPrivateConstructor")
@@ -23,7 +25,7 @@ data class ModelElement private constructor(
     val from: Vector3,
     @Serializable(with = Vector3Serializer::class)
     val to: Vector3,
-    val faces: Map<Face, FaceInfo> = emptyMap(),
+    val faces: Map<BlockFace, FaceInfo> = emptyMap(),
     val rotation: Rotation? = null,
     val shade: Boolean = true
 ) {
@@ -37,7 +39,7 @@ data class ModelElement private constructor(
         //val blending = BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
         val blending = BlendingAttribute(false, 1f)
         for ((face, data) in faces.toSortedMap()) {
-            val vertices = face.vertexSelector(from, to)
+            val vertices = face.toRect(from, to)
             val texture = textures.computeIfAbsent(data.texture.substringAfter("#")) {
                 model.getTexture(it).blockTexture()
             }
@@ -55,12 +57,13 @@ data class ModelElement private constructor(
                     blending
                 ),
             )
+            val normal = normals[face]!!
             mpb.rect(
                 vertices[0] / 16, vertices[1] / 16, vertices[2] / 16,
                 vertices[3] / 16, vertices[4] / 16, vertices[5] / 16,
                 vertices[6] / 16, vertices[7] / 16, vertices[8] / 16,
                 vertices[9] / 16, vertices[10] / 16, vertices[11] / 16,
-                face.normal.x, face.normal.y, face.normal.z
+                normal.x, normal.y, normal.z
             )
             mpb.setUVRange(region)
         }
@@ -91,61 +94,58 @@ data class ModelElement private constructor(
             return "FaceInfo(texture='$texture', uv=${uv.contentToString()}, cullFace=$cullFace, rotation=$rotation, tintIndex=$tintIndex)"
         }
     }
+}
 
-    @Serializable
-    enum class Face(
-        val vertexSelector: (from: Vector3, to: Vector3) -> FloatArray,
-        val normal: Vector3
-    ) {
-        UP({ from, to ->
-            floatArrayOf(
-                from.x, to.y, from.z,
-                from.x, to.y, to.z,
-                to.x, to.y, to.z,
-                to.x, to.y, from.z
-            )
-        }, Vector3(0f, 1f, 0f)),
-        DOWN({ from, to ->
-            floatArrayOf(
-                to.x, from.y, from.z,
-                to.x, from.y, to.z,
-                from.x, from.y, to.z,
-                from.x, from.y, from.z
-            )
-        }, Vector3(0f, -1f, 0f)),
-        NORTH({ from, to ->
-            floatArrayOf(
-                to.x, from.y, from.z,
-                from.x, from.y, from.z,
-                from.x, to.y, from.z,
-                to.x, to.y, from.z
-            )
-        }, Vector3(0f, 0f, -1f)),
-        SOUTH({ from, to ->
-            floatArrayOf(
-                from.x, from.y, to.z,
-                to.x, from.y, to.z,
-                to.x, to.y, to.z,
-                from.x, to.y, to.z
-            )
-        }, Vector3(0f, 0f, 1f)),
-        EAST({ from, to ->
-            floatArrayOf(
-                to.x, from.y, to.z,
-                to.x, from.y, from.z,
-                to.x, to.y, from.z,
-                to.x, to.y, to.z
-            )
-        }, Vector3(1f, 0f, 0f)),
-        WEST({ from, to ->
-            floatArrayOf(
-                from.x, from.y, from.z,
-                from.x, from.y, to.z,
-                from.x, to.y, to.z,
-                from.x, to.y, from.z
-            )
-        }, Vector3(-1f, 0f, 0f));
+private fun BlockFace.toRect(from: Vector3, to: Vector3): FloatArray {
+    return when (this) {
+        BlockFace.UP -> floatArrayOf(
+            from.x, to.y, from.z,
+            from.x, to.y, to.z,
+            to.x, to.y, to.z,
+            to.x, to.y, from.z
+        )
+
+        BlockFace.DOWN -> floatArrayOf(
+            to.x, from.y, from.z,
+            to.x, from.y, to.z,
+            from.x, from.y, to.z,
+            from.x, from.y, from.z
+        )
+
+        BlockFace.NORTH -> floatArrayOf(
+            to.x, from.y, from.z,
+            from.x, from.y, from.z,
+            from.x, to.y, from.z,
+            to.x, to.y, from.z
+        )
+
+        BlockFace.SOUTH -> floatArrayOf(
+            from.x, from.y, to.z,
+            to.x, from.y, to.z,
+            to.x, to.y, to.z,
+            from.x, to.y, to.z
+        )
+
+        BlockFace.EAST -> floatArrayOf(
+            to.x, from.y, to.z,
+            to.x, from.y, from.z,
+            to.x, to.y, from.z,
+            to.x, to.y, to.z
+        )
+
+        BlockFace.WEST -> floatArrayOf(
+            from.x, from.y, from.z,
+            from.x, from.y, to.z,
+            from.x, to.y, to.z,
+            from.x, to.y, from.z
+        )
+
+        else -> throw IllegalArgumentException("Unsupported face: $this")
     }
+}
+
+private val normals = BlockFace.entries.associateWithTo(EnumMap(BlockFace::class.java)) {
+    Vector3(it.modX.toFloat(), it.modY.toFloat(), it.modZ.toFloat())
 }
 
 @OptIn(ExperimentalSerializationApi::class)

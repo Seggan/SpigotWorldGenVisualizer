@@ -18,6 +18,8 @@ class ClientChunk(
 ) {
     fun getBlocks(): List<ModelInstance> {
         val blocks = mutableListOf<ModelInstance>()
+        val cx = x * 16
+        val cz = z * 16
         for (y in 0 until world.maxHeight) {
             for (x in 0 until 16) {
                 for (z in 0 until 16) {
@@ -32,7 +34,7 @@ class ClientChunk(
                         !data.getType(relX, relY, relZ).isEmpty
                     }) continue
                     val creator = BlockCache[block] ?: continue
-                    blocks += creator.createInstance(x, y, z)
+                    blocks += creator.createInstance(cx + x, y, cz + z)
                 }
             }
         }

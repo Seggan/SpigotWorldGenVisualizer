@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.PerspectiveCamera
 import com.badlogic.gdx.graphics.g3d.Environment
 import com.badlogic.gdx.graphics.g3d.ModelBatch
+import com.badlogic.gdx.graphics.g3d.ModelCache
 import com.badlogic.gdx.graphics.g3d.ModelInstance
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalShadowLight
@@ -14,6 +15,7 @@ import com.badlogic.gdx.utils.viewport.Viewport
 import io.github.seggan.swgv.client.minecraft.ClientChunk
 import io.github.seggan.swgv.client.minecraft.block.BlockCache
 import io.github.seggan.swgv.client.minecraft.generateChunk
+import io.github.seggan.swgv.client.util.distanceSquared
 import ktx.app.clearScreen
 import org.bukkit.World
 import org.bukkit.generator.ChunkGenerator
@@ -36,7 +38,7 @@ class Client(
     override fun create() {
         camera = PerspectiveCamera(67f, Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat())
         camera.position.set(0f, 70f, 0f)
-        camera.lookAt(0f, 70f, 0f)
+        camera.lookAt(1f, 70f, 1f)
         camera.near = 1f
         camera.far = 300f
         camera.update()
@@ -89,3 +91,5 @@ class Client(
         BlockCache.dispose()
     }
 }
+
+private const val RENDER_DISTANCE = 8
