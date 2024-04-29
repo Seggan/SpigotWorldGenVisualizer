@@ -56,7 +56,7 @@ class ClientChunk(
 }
 
 fun ChunkData.hasSolidBlock(info: WorldInfo, x: Int, y: Int, z: Int): Boolean {
-    if (x < 0 || x >= 16 || z < 0 || z >= 16 || y < info.minHeight || y >= info.maxHeight) return true
+    if (x < 0 || x >= 16 || z < 0 || z >= 16 || y < info.minHeight || y >= info.maxHeight) return false
     return getType(x, y, z).isSolid
 }
 

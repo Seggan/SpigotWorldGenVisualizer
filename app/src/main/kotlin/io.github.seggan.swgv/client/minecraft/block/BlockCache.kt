@@ -5,7 +5,6 @@ import com.badlogic.gdx.utils.Disposable
 import io.github.seggan.swgv.client.minecraft.McMaterial
 import io.github.seggan.swgv.client.minecraft.block.model.BlockModel
 import io.github.seggan.swgv.client.minecraft.block.model.ElementFace
-import io.github.seggan.swgv.client.util.identityHashSet
 import java.util.*
 
 object BlockCache : Disposable {
@@ -17,8 +16,7 @@ object BlockCache : Disposable {
         if (material.isEmpty) return emptyList()
         return blocks.getOrPut(material) {
             val model = BlockModel.getModel(material.name.lowercase())
-            val (models, _) = model.elements.map { it.getFaceModels(model) }.unzip()
-            models.flatten()
+            model.elements.map { it.getFaceModels(model) }.flatten()
         }
     }
 

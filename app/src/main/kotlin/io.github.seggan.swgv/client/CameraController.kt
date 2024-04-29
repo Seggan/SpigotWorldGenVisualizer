@@ -17,6 +17,8 @@ class CameraController(private val cam: Camera) : InputAdapter() {
     private val keys = IntIntMap()
     private val tmp = Vector3()
 
+    private var moveScale = 1f
+
     override fun mouseMoved(screenX: Int, screenY: Int): Boolean {
         if (!Gdx.input.isCursorCatched) return false
         if (dragX == 0 && dragY == 0) {
@@ -58,33 +60,38 @@ class CameraController(private val cam: Camera) : InputAdapter() {
         if (keys.containsKey(Keys.W)) {
             tmp.set(cam.direction)
             tmp.y = 0f
-            tmp.nor().scl(MOVE_SPEED * dt)
+            tmp.nor().scl(MOVE_SPEED * moveScale * dt)
         }
         if (keys.containsKey(Keys.S)) {
             tmp.set(cam.direction)
             tmp.y = 0f
-            tmp.nor().scl(-MOVE_SPEED * dt)
+            tmp.nor().scl(-MOVE_SPEED * moveScale * dt)
         }
         if (keys.containsKey(Keys.A)) {
-            tmp.set(cam.direction).crs(cam.up).nor().scl(-MOVE_SPEED * dt)
+            tmp.set(cam.direction).crs(cam.up).nor().scl(-MOVE_SPEED * moveScale * dt)
         }
         if (keys.containsKey(Keys.D)) {
-            tmp.set(cam.direction).crs(cam.up).nor().scl(MOVE_SPEED * dt)
+            tmp.set(cam.direction).crs(cam.up).nor().scl(MOVE_SPEED * moveScale * dt)
         }
         if (keys.containsKey(Keys.SPACE)) {
-            tmp.set(Vector3.Y).scl(MOVE_SPEED * dt)
+            tmp.set(Vector3.Y).scl(MOVE_SPEED * moveScale * dt)
         }
         if (keys.containsKey(Keys.SHIFT_LEFT)) {
-            tmp.set(Vector3.Y).scl(-MOVE_SPEED * dt)
+            tmp.set(Vector3.Y).scl(-MOVE_SPEED * moveScale * dt)
         }
         if (keys.containsKey(Keys.ESCAPE)) {
             Gdx.input.isCursorCatched = false
+        }
+        if (keys.containsKey(Keys.CONTROL_LEFT)) {
+            moveScale = 5f
+        } else {
+            moveScale = 1f
         }
         cam.position.add(tmp)
     }
 
     companion object {
         private const val ROT_SPEED = 0.3f
-        private const val MOVE_SPEED = 5f
+        private const val MOVE_SPEED = 10f
     }
 }

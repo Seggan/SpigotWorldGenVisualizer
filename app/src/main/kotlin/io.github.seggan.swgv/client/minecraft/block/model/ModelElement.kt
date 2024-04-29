@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.VertexAttributes.Usage
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.graphics.g3d.Material
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute
+import com.badlogic.gdx.graphics.g3d.attributes.DepthTestAttribute
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder
 import com.badlogic.gdx.math.Vector3
@@ -27,7 +28,7 @@ data class ModelElement private constructor(
     val shade: Boolean = true
 ) {
 
-    fun getFaceModels(model: BlockModel): Pair<List<ElementFace>, List<Texture>> {
+    fun getFaceModels(model: BlockModel): List<ElementFace> {
         val attr = (Usage.Position or
                 Usage.Normal or
                 Usage.TextureCoordinates
@@ -55,13 +56,14 @@ data class ModelElement private constructor(
                 normal.x, normal.y, normal.z,
                 Material(
                     TextureAttribute.createDiffuse(region),
-                    blending
+                    blending,
+                    DepthTestAttribute(true)
                 ),
                 attr
             )
             models.add(ElementFace(face, result))
         }
-        return models to textures.values.toList()
+        return models
     }
 
     @Serializable
