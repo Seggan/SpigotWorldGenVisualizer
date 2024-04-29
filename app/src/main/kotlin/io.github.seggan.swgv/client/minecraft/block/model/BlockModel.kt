@@ -1,7 +1,6 @@
 package io.github.seggan.swgv.client.minecraft.block.model
 
 import io.github.seggan.swgv.ASSETS_DIR
-import io.github.seggan.swgv.TEMP_DIR
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -17,10 +16,10 @@ data class BlockModel private constructor(
     val ambientOcclusion: Boolean = true
 ) {
 
-    fun getTexture(texture: String): ModelTexture.Texture {
+    fun getTexture(texture: String): ModelTexture.Location {
         val tex = textures[texture] ?: throw IllegalArgumentException("Texture $texture not found")
         return when (tex) {
-            is ModelTexture.Texture -> tex
+            is ModelTexture.Location -> tex
             is ModelTexture.Tag -> getTexture(tex.tag)
         }
     }

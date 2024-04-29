@@ -17,7 +17,7 @@ object BlockCache : Disposable {
         if (material.isEmpty) return emptyList()
         return blocks.getOrPut(material) {
             val model = BlockModel.getModel(material.name.lowercase())
-            val (models, textures) = model.elements.map { it.getFaceModels(model) }.unzip()
+            val (models, _) = model.elements.map { it.getFaceModels(model) }.unzip()
             models.flatten()
         }
     }
